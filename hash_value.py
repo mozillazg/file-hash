@@ -44,7 +44,7 @@ def crc32_value(filename, filesize, maxsize):
     返回整型类型的 CRC32 值
     """
     crc = 0
-    with open(filepath, 'rb') as openfile:
+    with open(filename, 'rb') as openfile:
         if filesize < maxsize:
             data = openfile.read()
         else:
