@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# 输入文件路径返回如下信息：
+# File path:
+# Size:
+# Date modified:
+# MD5:
+# SHA1:
+# CRC32:
+# ----------------------------------------------------------
+# Author: mozillazg
+# Blog: http://mzgblog.appspot.com/
+# Version: 2011/5/20
+
 import hashlib
 import zlib
 import os
 from time import localtime, strftime
-
-"""输入文件路径返回如下信息：
-File path:
-Size:
-Date modified:
-MD5:
-SHA1:
-CRC32:
-"""
+import re
 
 # hash 计算 MD5 、SHA1
 def hash_value(filename, filesize, maxsize, xhash):
@@ -54,8 +58,10 @@ def crc32_value(filename, filesize, maxsize):
 
 
 if __name__ == '__main__':
-    # TO DO: 去除 filepath 首尾的单引号及双引号
-    filepath = raw_input('请输入文件路径：').strip().decode('utf-8')
+    
+    text = raw_input('请输入文件路径：').strip().decode('utf-8')
+    # 去除 filepath 首尾的单引号及双引号
+    filepath = re.sub('^\"|^\'|\"$|\'$', '', text).strip() 
     blocksize = 1024 * 1024 # 每次读取的文件块的大小（bytes）
     size = os.path.getsize(filepath) # 文件大小
     date = strftime('%Y/%m/%d %H:%M:%S', # 文件最后修改时间
