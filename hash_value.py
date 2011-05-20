@@ -5,6 +5,7 @@ import hashlib
 import zlib
 import os
 from time import localtime, strftime
+import wx
 
 """输入文件路径返回如下信息：
 File path:
@@ -40,7 +41,7 @@ def crc32_value(filename, filesize, maxsize):
     返回整型类型的 CRC32 值
     """
     crc = 0
-    with open(filepath, 'rb') as openfile:
+    with open(filename, 'rb') as openfile:
         if filesize < maxsize:
             data = openfile.read()
         else:
@@ -52,10 +53,18 @@ def crc32_value(filename, filesize, maxsize):
     crc = zlib.crc32(data, crc)
     return crc
 
+def choose_file(event):
+    file_p = wx.FileDialog(bkg, 'Choose a file', 
+                                        style=wx.DD_DEFAULT_STYLE)
+    if file_p.ShowModal() == wx.ID_OK:
+        path = file_p.GetPath()
+        file_path_txt.SetValue(path)
+    file_p.Destroy()
+    if file_path_txt.GetValue():
+        hash_result()
 
-if __name__ == '__main__':
-    # TO DO: 去除 filepath 首尾的单引号及双引号
-    filepath = raw_input('请输入文件路径：').strip().decode('utf-8')
+def hash_result():
+    filepath = file_path_txt.GetValue()
     blocksize = 1024 * 1024 # 每次读取的文件块的大小（bytes）
     size = os.path.getsize(filepath) # 文件大小
     date = strftime('%Y/%m/%d %H:%M:%S', # 文件最后修改时间
@@ -74,3 +83,54 @@ if __name__ == '__main__':
     print 'MD5: %s' % md5.upper()
     print 'SHA1: %s' % sha1.upper()
     print 'CRC32: %X' % (crc32 & 0xffffffff)
+
+
+if __name__ == '__main__':
+    app = wx.App()
+    win = wx.Frame(None, title="Python File Hash", size=(500, 335))
+    bkg = wx.Panel(win)
+    
+    chooseButton = wx.Button(bkg, label='Browse...')
+    chooseButton.Bind(wx.EVT_BUTTON, choose_file)
+    label1 = wx.StaticText(bkg,1,"File path: ")
+    file_path_txt = wx.TextCtrl(bkg, -1, "")
+    contents = wx.TextCtrl(bkg, style=wx.TE_READONLY | wx.TE_MULTILINE 
+                                                | wx.HSCROLL)
+    
+    hbox = wx.BoxSizer()
+    hbox.Add(label1, proportion=0, flag=wx.ALIGN_CENTRE|wx.ALL, border=5)
+    hbox.Add(file_path_txt, 1, wx.EXPAND, 5)
+    hbox.Add(chooseButton, 0, wx.LEFT, 5)
+    
+    vbox = wx.BoxSizer(wx.VERTICAL)
+    vbox.Add(hbox, 0, wx.EXPAND | wx.ALL, 5)
+    vbox.Add(contents, proportion=1,
+                        flag=wx.EXPAND | wx.LEFT | wx.BOTTOM 
+                        | wx.RIGHT, border=5)
+    
+    bkg.SetSizer(vbox)
+    win.Show()
+    
+    app.MainLoop()
+
+
+    ## TO DO: 去除 filepath 首尾的单引号及双引号
+    #filepath = raw_input('请输入文件路径：').strip().decode('utf-8')
+    #blocksize = 1024 * 1024 # 每次读取的文件块的大小（bytes）
+    #size = os.path.getsize(filepath) # 文件大小
+    #date = strftime('%Y/%m/%d %H:%M:%S', # 文件最后修改时间
+                                #localtime(os.path.getmtime(filepath)))
+    #md5 = hash_value(filepath, size, blocksize, hashlib.md5()) # 计算 MD5 值
+    #sha1 = hash_value(filepath, size, blocksize, hashlib.sha1()) # 计算 SHA1 值
+    #crc32 = crc32_value(filepath, size, blocksize) # CRC32
+    
+    #print 'File path: %s' % filepath
+    #print 'Size: %s bytes' % size
+    #print 'Date modified: %s' % date
+    ##print 'MD5: %s' % md5
+    ##print 'SHA1: %s' % sha1
+    ##print 'CRC32: %x' % (crc32 & 0xffffffff)
+    ## 处理结果使其中的字母大写
+    #print 'MD5: %s' % md5.upper()
+    #print 'SHA1: %s' % sha1.upper()
+    #print 'CRC32: %X' % (crc32 & 0xffffffff)
