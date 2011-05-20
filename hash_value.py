@@ -51,7 +51,7 @@ def crc32_value(filename, filesize, maxsize):
                     break
                 crc = zlib.crc32(data, crc) 
     crc = zlib.crc32(data, crc)
-    return crc
+    return '%x' %(crc & 0xffffffff)
 
 def choose_file(event):
     file_p = wx.FileDialog(bkg, 'Choose a file', 
@@ -73,19 +73,15 @@ def hash_result():
     sha1 = hash_value(filepath, size, blocksize, hashlib.sha1()) # 计算 SHA1 值
     crc32 = crc32_value(filepath, size, blocksize) # CRC32
     
-    print 'File path: %s' % filepath
-    print 'Size: %s bytes' % size
-    print 'Date modified: %s' % date
-    #print 'MD5: %s' % md5
-    #print 'SHA1: %s' % sha1
-    #print 'CRC32: %x' % (crc32 & 0xffffffff)
-    # 处理结果使其中的字母大写
-    print 'MD5: %s' % md5.upper()
-    print 'SHA1: %s' % sha1.upper()
-    print 'CRC32: %X' % (crc32 & 0xffffffff)
+    contents.AppendText('File path: ' + filepath + '\n')
+    contents.AppendText('Size: ' + str(size) +' bytes\n')
+    contents.AppendText( 'MD5: '+ md5.upper() + '\n')
+    contents.AppendText('SHA1: ' + sha1.upper() + '\n')
+    contents.AppendText('CRC32: ' + str(crc32).upper() + '\n\n')
 
 
 if __name__ == '__main__':
+    # TO-DO: 拖拽输入文件路径并立即触发求值 Bind()?
     app = wx.App()
     win = wx.Frame(None, title="Python File Hash", size=(500, 335))
     bkg = wx.Panel(win)
@@ -94,8 +90,8 @@ if __name__ == '__main__':
     chooseButton.Bind(wx.EVT_BUTTON, choose_file)
     label1 = wx.StaticText(bkg,1,"File path: ")
     file_path_txt = wx.TextCtrl(bkg, -1, "")
-    contents = wx.TextCtrl(bkg, style=wx.TE_READONLY | wx.TE_MULTILINE 
-                                                | wx.HSCROLL)
+    contents = wx.TextCtrl(bkg, style=wx.TE_MULTILINE | wx.HSCROLL)
+    #file_path_txt.SetDropTarget()
     
     hbox = wx.BoxSizer()
     hbox.Add(label1, proportion=0, flag=wx.ALIGN_CENTRE|wx.ALL, border=5)
