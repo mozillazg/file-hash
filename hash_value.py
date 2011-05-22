@@ -16,6 +16,8 @@ SHA1:
 CRC32:
 """
 
+# TO-Do: 面向对象编程, class
+
 # hash 计算 MD5 、SHA1
 def hash_value(filename, filesize, maxsize, xhash):
     """提供要计算 hash 值的文件路径、文件大小、每次读取的文件块大小及
@@ -23,15 +25,11 @@ def hash_value(filename, filesize, maxsize, xhash):
     返回字符串类型的 hash 值
     """
     with open(filename, 'rb') as openfile: # 打开文件，一定要是以二进制打开
-        if filesize < maxsize: # 如果是小文件
-            data = openfile.read()
+        while True: 
+            data = openfile.read(maxsize) # 读取文件块
+            if not data: # 直到读完文件
+                break
             xhash.update(data)
-        else: # 大文件
-            while True: 
-                data = openfile.read(maxsize) # 读取文件块
-                if not data: # 直到读完文件
-                    break
-                xhash.update(data)
     return xhash.hexdigest()
 
 
@@ -42,15 +40,11 @@ def crc32_value(filename, filesize, maxsize):
     """
     crc = 0
     with open(filename, 'rb') as openfile:
-        if filesize < maxsize:
-            data = openfile.read()
-        else:
-            while True:
-                data = openfile.read(maxsize)
-                if not data:
-                    break
-                crc = zlib.crc32(data, crc) 
-    crc = zlib.crc32(data, crc)
+        while True:
+            data = openfile.read(maxsize)
+            if not data: # 直到读完文件
+                break
+            crc = zlib.crc32(data, crc)
     return '%x' %(crc & 0xffffffff)
 
 def choose_file(event):
@@ -74,14 +68,15 @@ def hash_result():
     crc32 = crc32_value(filepath, size, blocksize) # CRC32
     
     contents.AppendText('File path: ' + filepath + '\n')
-    contents.AppendText('Size: ' + str(size) +' bytes\n')
-    contents.AppendText( 'MD5: '+ md5.upper() + '\n')
+    contents.AppendText('Size: ' + str(size) + ' bytes\n')
+    contents.AppendText('Date modified:: ' + date + '\n')
+    contents.AppendText( 'MD5: ' + md5.upper() + '\n')
     contents.AppendText('SHA1: ' + sha1.upper() + '\n')
     contents.AppendText('CRC32: ' + str(crc32).upper() + '\n\n')
 
 
 if __name__ == '__main__':
-    # TO-DO: 拖拽输入文件路径并立即触发求值 Bind()?
+    # TO-DO: 拖拽输入文件并获取路径
     app = wx.App()
     win = wx.Frame(None, title="Python File Hash", size=(500, 335))
     bkg = wx.Panel(win)
