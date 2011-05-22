@@ -26,15 +26,11 @@ def hash_value(filename, filesize, maxsize, xhash):
     返回字符串类型的 hash 值
     """
     with open(filename, 'rb') as openfile: # 打开文件，一定要是以二进制打开
-        if filesize < maxsize: # 如果是小文件
-            data = openfile.read()
+        while True: 
+            data = openfile.read(maxsize) # 读取文件块
+            if not data: # 直到读完文件
+                break
             xhash.update(data)
-        else: # 大文件
-            while True: 
-                data = openfile.read(maxsize) # 读取文件块
-                if not data: # 直到读完文件
-                    break
-                xhash.update(data)
     return xhash.hexdigest()
 
 
@@ -45,15 +41,11 @@ def crc32_value(filename, filesize, maxsize):
     """
     crc = 0
     with open(filename, 'rb') as openfile:
-        if filesize < maxsize:
-            data = openfile.read()
-        else:
-            while True:
-                data = openfile.read(maxsize)
-                if not data:
-                    break
-                crc = zlib.crc32(data, crc) 
-    crc = zlib.crc32(data, crc)
+        while True:
+            data = openfile.read(maxsize)
+            if not data:
+                break
+            crc = zlib.crc32(data, crc)
     return crc
 
 
